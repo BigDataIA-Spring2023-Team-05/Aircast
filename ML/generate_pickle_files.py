@@ -12,6 +12,9 @@ import pickle
 print('>>>>>>>>>>>>>>>>  data extraction started')
 inp_data =  pd.read_csv('check.csv',sep = ",")
 print('>>>>>>>>>>>>>>>>  data extraction done')
+
+
+
 ## Preprocessing
 # droping null values
 inp_data = inp_data.dropna()

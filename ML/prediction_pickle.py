@@ -14,7 +14,7 @@ engine = create_engine('mysql+pymysql://admin:123456789@aircast.cjisewdv5jgk.us-
 aqsid = '250250042'
 # Read data from the SQL table into a dataframe
 print('>>>>>>>>>>>>>>>>  data extraction started')
-inp_data = pd.read_sql_query('SELECT * from aircast.StationsData WHERE aquid = "%s"' % aqsid, engine)
+inp_data = pd.read_sql_query('SELECT * from aircast.StationsDataDaily WHERE aquid = "%s"' % aqsid, engine)
 print('>>>>>>>>>>>>>>>>  data extraction done')
 ####
 
@@ -66,10 +66,11 @@ scaler = MinMaxScaler()
 scaled_data = scaler.fit_transform(values)
 n_steps = 24
 X, y = split_sequences(scaled_data, n_steps)
+print(X.size)
 n_features = X.shape[2]
 
 # demonstrate prediction
-x_input = X[-24:]
+x_input = X
 x_input = x_input.reshape((24, n_steps, n_features))
 
 
@@ -81,7 +82,8 @@ print('>>>>>>>>>>>>>>>>  Feature engineering done')
 # load the model from disk
 
 print('>>>>>>>>>>>>>>>>  Prediction done')
-model = pickle.load(open('250250042.pkl', 'rb'))
+filename = '%s.pkl' % aqsid
+model = pickle.load(open(filename, 'rb'))
 
 yhat = model.predict(x_input, verbose=0)
 req = scaler.inverse_transform(yhat)

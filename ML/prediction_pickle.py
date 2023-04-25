@@ -12,18 +12,10 @@ from sqlalchemy import create_engine, Table, Column, Integer, String, Float, Met
 ## Importing 1 year data
 engine = create_engine('mysql+pymysql://admin:123456789@aircast.cjisewdv5jgk.us-east-1.rds.amazonaws.com:3306/aircast')
 aqsid = '250250042'
-
-
-####
-
-#####################   DATA EXTRACTION FROM AWS DataBase #############################
-
-####
 # Read data from the SQL table into a dataframe
 print('>>>>>>>>>>>>>>>>  data extraction started')
 inp_data = pd.read_sql_query('SELECT * from aircast.StationsData WHERE aquid = "%s"' % aqsid, engine)
 print('>>>>>>>>>>>>>>>>  data extraction done')
-
 ####
 
 ##################    FEATURE ENGINEERING  #############################
@@ -31,7 +23,6 @@ print('>>>>>>>>>>>>>>>>  data extraction done')
 ####
 # Renaming columns :
 inp_data = inp_data.rename(columns={'collection_timestamp':'datetime','ozone':'OZONE', 'so2':'SO2', 'no2':'NO2','co':'CO','pm2_5':'PM2.5','pm10':'PM10'})
-
 df = inp_data.copy()
 # Create a boolean array of the same shape as the dataframe
 df = df.replace('NULL',0)
@@ -39,7 +30,6 @@ df = df.replace('NULL',0)
 df = df.drop(columns=df.columns[df.isnull().all()].tolist())
 ## Storing aqs_id:
 aqsid = df['aquid'].iloc[0]
-
 # Dropping un-required columns
 df = df.drop(columns = ['aquid','id'])
 
@@ -49,19 +39,10 @@ check = check.set_index('datetime')
 
 ## Sorting values
 df_sorted = check.sort_values(by='datetime')
-
 ## Converting type of the Columns data of Pollutants:
 for i in df_sorted.columns:
 	df_sorted[i] = df_sorted[i].astype(float)
-print(df_sorted.info(),'df_sorted_info()')
 
-print('>>>>>>>>>>>>>>>>  Feature engineering done')
-
-####
-
-##################    MODELING AND PICKLE GENERATION  #############################
-
-####
 
 # split a multivariate sequence into samples
 def split_sequences(sequences, n_steps):
@@ -77,11 +58,8 @@ def split_sequences(sequences, n_steps):
 		X.append(seq_x)
 		y.append(seq_y)
 	return np.array(X), np.array(y)
-
-print('>>>>>>>>>>>>>>>> pickle generation started for :', aqsid)
 ## Pickle generation:
 df = df_sorted.copy()
-print(df.info(),'df_info()')
 values = df.values
 column_names = df.columns.tolist()
 scaler = MinMaxScaler()
@@ -89,29 +67,24 @@ scaled_data = scaler.fit_transform(values)
 n_steps = 24
 X, y = split_sequences(scaled_data, n_steps)
 n_features = X.shape[2]
-# Split the data into training and testing sets
-train_size = int(len(df_sorted) * 0.2)
-X_train, X_test = X[train_size:,] , X[:train_size,] 
-# print('X_train' ,X_train.shape)
-# print('X_test' ,X_test.shape)
-Y_train, Y_test = y[train_size:,] , y[:train_size,]
-# print('Y_train' ,Y_train.shape)
-# print('Y_test' ,Y_test.shape)
-n_features = X.shape[2]
-# define model
-model = Sequential()
-model.add(LSTM(100, activation='relu', return_sequences=True, input_shape=(n_steps, n_features)))
-model.add(LSTM(100, activation='relu'))
-model.add(Dense(n_features))
-model.compile(optimizer='adam', loss='mse')
-# fit model
-model.fit(X_train, Y_train, epochs=45, verbose =1 )
-# save the model to disk
-filename = '%s.pkl' % aqsid
-pickle.dump(model, open(filename, 'wb'))
 
-
-print('>>>>>>>>>>>>>>>> pickle generation ended for :', aqsid)
+# demonstrate prediction
+x_input = X[-24:]
+x_input = x_input.reshape((24, n_steps, n_features))
 
 
 
+
+print('>>>>>>>>>>>>>>>>  Feature engineering done')
+
+
+# load the model from disk
+
+print('>>>>>>>>>>>>>>>>  Prediction done')
+model = pickle.load(open('250250042.pkl', 'rb'))
+
+yhat = model.predict(x_input, verbose=0)
+req = scaler.inverse_transform(yhat)
+date_time_index = pd.date_range(start='00:00:00', end='23:00:00', freq='1H')
+final = pd.DataFrame(index=date_time_index, columns=column_names, data = req)
+print(final)

@@ -27,7 +27,7 @@ else:
 st.write("The elements for the zipcode you entered")
 
 ##----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-st.button("Upgrade Subscription")
+
 
 
 # Create two columns with the same width
@@ -110,7 +110,6 @@ fig = go.Figure(data=bars)
 fig.update_layout(title="Risk range for all particles", xaxis_title="Particle", yaxis_title="Value")
 # Display the figure in Streamlit
 st.plotly_chart(fig)
-
 
 
 

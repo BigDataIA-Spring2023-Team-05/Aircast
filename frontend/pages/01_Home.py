@@ -3,12 +3,14 @@ import plotly.express as px
 import plotly.graph_objects as go
 import requests
 import random
+import os
+import json
 
 st.title('Air Cast-  Relaible air quality prediction in your area')
 st.write('Enter your zipcode')
 # particles = ["NO","PM2.5","PM","OZONE"]
 # Define the range of valid zip codes
-min_zip = 10000
+min_zip = 00000
 max_zip = 99999
 # particles = ["NO","PM2.5","PM","OZONE"]
 # Get the zip code input from the user
@@ -33,12 +35,12 @@ left_column, right_column = st.columns(2)
 # Add content to the left column
 with left_column:
     st.header('API calls remaining')
-    st.write("This is the left column.")
+    st.write("Number")
 
 # Add content to the right column
 with right_column:
     st.header('API calls done')
-    st.write("This is the right column.")
+    st.write("Number ")
 
 ##-------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Read elements from file or database
@@ -108,35 +110,62 @@ fig = go.Figure(data=bars)
 fig.update_layout(title="Risk range for all particles", xaxis_title="Particle", yaxis_title="Value")
 # Display the figure in Streamlit
 st.plotly_chart(fig)
-#--------------------------------------------------------------------------------------------------------------------------------------------#
+
+
+
+
+
+
+
+
+
+
+
+
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Recommendations based on ChatGPT
-st.write("Chat GPT recommendations")
 
 
-# # Define the particle values
-# particles = [3, 4, 6, 8, 34, 11, 12]
-
-# # Create a Plotly line plot of the particle values
-# fig = go.Figure()
-# fig.add_trace(go.Scatter(x=list(range(len(particles))), y=particles, mode='lines'))
-
-# # Set the plot title and axis labels
-# fig.update_layout(title='Particle Values', xaxis_title='Time', yaxis_title='Number of Particles')
+# Set the AQI value and parameter
+aqi = 35
+parameter = "ozone"
 
 
-# # Create a Plotly bar chart of the particle values
-# fig_bar = go.Figure()
-# fig_bar.add_trace(go.Bar(x=list(range(len(particles))), y=particles))
-# fig_bar.update_layout(title='Particle Values - Bar Chart', xaxis_title='Time', yaxis_title='Number of Particles')
+#setting the API KEY here
+CHATGPT_API_KEY = "mention the api key here"
 
-# # Create a Plotly pie chart of the particle values
-# fig_pie = go.Figure()
-# fig_pie.add_trace(go.Pie(values=particles))
-# fig_pie.update_layout(title='Particle Values - Pie Chart')
+# Get the response from the ChatGPT API
+url = "https://api.openai.com/v1/engines/davinci/completions"
 
+headers = {
+  "Authorization": "Bearer YOUR_API_KEY",
+  "Content-Type": "application/json",
+}
 
-# # Display the plot in Streamlit
-# st.plotly_chart(fig)
-# st.plotly_chart(fig_bar)
-# st.plotly_chart(fig_pie)
+data = {
+  "prompt": "I am an air quality expert. Answer the below in less than 50 words as an air quality expert: what are effects of AQI {} {} what range is it in and what are the effects on health?".format(aqi, parameter),
+  "temperature": 0.7,
+  "max_tokens": 50,
+  "presence_penalty": 0.2,
+  "stop_token": ".",
+}
+
+response = requests.post(url, headers=headers, data=json.dumps(data))
+
+# Check the response status code
+if response.status_code == 200:
+  # Get the response data
+  response_data = json.loads(response.content)
+
+  # Get the completion
+  gpt_response = response_data["choices"][0]["text"]
+
+  # Print the completion
+  st.write("Chat GPT completion")
+  print(gpt_response)
+
+else:
+  if response.status_code == 404:
+    print("Error retrieving the response: {}".format(response.status_code))
 

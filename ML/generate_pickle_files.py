@@ -23,7 +23,7 @@ src_bucket = s3.Bucket('damg-aircast')
 
 ## Importing 1 year data
 engine = create_engine('mysql+pymysql://admin:123456789@aircast.cjisewdv5jgk.us-east-1.rds.amazonaws.com:3306/aircast')
-my_list = ['90131001', '90159991', '90031003', '250170010', '90030025', '250030008', '250250045', '250251004', '90079007', '250212005', '90050005', '90110124', '90092123', '90099002', '90090027', '90011123', '90013007', '90010010', '90019003', '361030044', '90010017', '340310005', '230230007', '360850055', '340292002', '340210008', '100031012', '100010003', '245105253', '230290033', '240396431', '240476432']
+my_list = ['250250042']
 counter = 0
 # aqsid = '250250042'
 for aqsid in my_list:
@@ -128,6 +128,7 @@ for aqsid in my_list:
 		# fit model
 		model.fit(X_train, Y_train, epochs=45, verbose =1 )
 		# save the model to disk
+		import pickle
 		filename = '%s.pkl' % aqsid
 		pickle.dump(model, open(filename, 'wb'))
 		

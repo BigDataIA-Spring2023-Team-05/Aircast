@@ -14,56 +14,7 @@ from sqlalchemy import create_engine, Table, Column, Integer, String, Float, Met
 ## Importing 1 year data
 
 engine = create_engine('mysql+pymysql://admin:123456789@aircast.cjisewdv5jgk.us-east-1.rds.amazonaws.com:3306/aircast')
-my_list = my_list = ['250154002',
-'250270015',
-'250130008',
-'250130018',
-'90131001',
-'330115001',
-'250270024',
-'330050007',
-'90159991',
-'330111011',
-'250170009',
-'90031003',
-'250170010',
-'90030025',
-'250036001',
-'250030008',
-'250250002',
-'250250042',
-'440070022',
-'440071010',
-'250250045',
-'250250044',
-'440030002',
-'250251004',
-'250095005',
-'90079007',
-'250092006',
-'500030004',
-'330131006',
-'250212005',
-'250230005',
-'90050005',
-'250051004',
-'90110124',
-'90092123',
-'440090007',
-'90099002',
-'360010012',
-'90090027',
-'250051006',
-'360910004',
-'330090010',
-'330150014',
-'360270007',
-'330150016',
-'330012004',
-'500210002',
-'90011123',
-'90013007',
-'90010010']
+my_list = ['250250002']
 
 for aqsid in my_list:
     # Read data from the SQL table into a dataframe
@@ -144,5 +95,7 @@ for aqsid in my_list:
     date_time_index = pd.date_range(start='00:00:00', end='23:00:00', freq='1H')
     final = pd.DataFrame(index=date_time_index, columns=column_names, data = req)
     
+    
 
     print('>>>>>>>>>>>>>>>> pickle generation ended for :', aqsid)
+    print(final)
